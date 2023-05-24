@@ -42,7 +42,7 @@ async def get_hello():
 async def get_items():
     # Effectuer des opérations sur la base de données
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM test")
+        cursor.execute("SELECT * FROM data")
         results = cursor.fetchall()
     # Retourner les résultats de l'API
     return {"items": results}
