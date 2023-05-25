@@ -1,7 +1,7 @@
 # 1. Library imports
 import uvicorn
 from typing import List
-from models import Test
+from models import Model_out
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 import pymysql
@@ -42,10 +42,23 @@ async def get_hello():
 async def get_items():
     # Effectuer des opérations sur la base de données
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM data")
+        cursor.execute("SELECT * FROM train_data LIMIT 2")
         results = cursor.fetchall()
     # Retourner les résultats de l'API
     return {"items": results}
+
+
+@app.post("/add")
+async def create_item(item: Model_out):
+    # Perform operations on the database
+    with conn.cursor() as cursor:
+        query = "INSERT INTO output_data (id,title,author,text,label) " \
+                 "VALUES (%s, %s, %s, %s, %s)"
+        values = (item.id, item.title, item.author, item.text, item.label)
+        cursor.execute(query, values)
+        conn.commit()
+
+    return {"message": "Item created successfully"}
 
 # # 4. Run the API with uvicorn
 # #    Will run on http://127.0.0.1:8000

@@ -3,6 +3,14 @@ from pydantic import BaseModel
 
 class Test(BaseModel):
     id: Optional[int]
-    Age : Optional[int]
-    Sexe : Optional[str]
-    Ville : Optional[str]
+    title : Optional[str]
+    author : Optional[str]
+    text : Optional[str]
+    label : Optional[int]
+
+class Model_out(BaseModel):
+    id: Optional[int]
+    title : Optional[str]
+    author : Optional[str]
+    text : Optional[str]
+    label : Optional[int]
