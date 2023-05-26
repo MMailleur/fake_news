@@ -12,24 +12,25 @@ import os
 load_dotenv()
 app = FastAPI()
 #conneries
+def connect():
+    # Récupérer l'URL de la base de données à partir des variables d'environnement
+    database_url = os.getenv("DATABASE_URL")
 
-# Récupérer l'URL de la base de données à partir des variables d'environnement
-database_url = os.getenv("DATABASE_URL")
+    # Extraire les composants de l'URL de la base de données
+    url_components = urlparse(database_url)
+    db_host = url_components.hostname
+    db_user = url_components.username
+    db_password = url_components.password
+    db_name = url_components.path.strip('/')
 
-# Extraire les composants de l'URL de la base de données
-url_components = urlparse(database_url)
-db_host = url_components.hostname
-db_user = url_components.username
-db_password = url_components.password
-db_name = url_components.path.strip('/')
-
-# Configurer la connexion à la base de données MySQL
-conn = pymysql.connect(
-    host=db_host,
-    user=db_user,
-    password=db_password,
-    database=db_name
-)
+    # Configurer la connexion à la base de données MySQL
+    conn = pymysql.connect(
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
+    )
+    return conn
 
 
 #----------------- Définir les routes de l'API-----------------------------#
@@ -41,15 +42,20 @@ async def get_hello():
 @app.get("/data")
 async def get_items():
     # Effectuer des opérations sur la base de données
+    conn = connect()
+
     with conn.cursor() as cursor:
         cursor.execute("SELECT * FROM train_data LIMIT 2")
         results = cursor.fetchall()
     # Retourner les résultats de l'API
+
+    conn.close()
     return {"items": results}
 
 @app.get("/5data")
 async def get_items(label :int =0 ,nbrow : int =5 ,lengthtext : int =200):
     # Effectuer des opérations sur la base de données
+    conn = connect()
     with conn.cursor() as cursor:
         cursor.execute(f" (SELECT * FROM fakebase.train_data \
 where LENGTH(text) > {lengthtext} and title >10 and label = {label}  \
@@ -61,6 +67,7 @@ ORDER BY LENGTH(text) asc LIMIT {nbrow})")
 
         results = cursor.fetchall()
     # Retourner les résultats de l'API
+    conn.close()
     return {"items": results}
 
 
@@ -68,13 +75,14 @@ ORDER BY LENGTH(text) asc LIMIT {nbrow})")
 @app.post("/add")
 async def create_item(item: Model_out):
     # Perform operations on the database
+    conn = connect()
     with conn.cursor() as cursor:
         query = "INSERT INTO output_data (id,title,author,text,label) " \
                  "VALUES (%s, %s, %s, %s, %s)"
         values = (item.id, item.title, item.author, item.text, item.label)
         cursor.execute(query, values)
         conn.commit()
-
+    conn.close()
     return {"message": "Item created successfully"}
 
 # # 4. Run the API with uvicorn
