@@ -81,6 +81,24 @@ ORDER BY LENGTH(text) asc LIMIT {nbrow})")
     conn.close()
     return {"items": results}
 
+@app.get("/datastem")
+async def get_items(label :int =0 ,nbrow : int =5 ,lengthtext : int =200):
+    # Effectuer des opérations sur la base de données
+    conn = connect()
+    with conn.cursor() as cursor:
+        cursor.execute(f" (SELECT * FROM fakebase.stem_data \
+where LENGTH(text) > {lengthtext} and title >10  \
+ORDER BY LENGTH(text) asc LIMIT {nbrow})")
+# union all\
+# (SELECT * FROM fakebase.train_data \
+# where LENGTH(text) > 200 and title >10 and label = 1\
+# ORDER BY LENGTH(text) asc LIMIT 5)")
+
+        results = cursor.fetchall()
+    # Retourner les résultats de l'API
+    conn.close()
+    return {"items": results}
+
 @app.post("/add")
 async def create_item(item: Model_out):
     # Perform operations on the database

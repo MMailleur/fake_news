@@ -21,3 +21,10 @@ class Model_pred(BaseModel):
     author : Optional[str]
     text : Optional[str]
     pred : Optional[int]
+
+class Model_stem(BaseModel):
+    id: Optional[int]
+    title : Optional[str]
+    author : Optional[str]
+    text : Optional[str]
+    text_stem : Optional[int]
