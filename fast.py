@@ -1,16 +1,27 @@
 # 1. Library imports
 import uvicorn
 from typing import List
-from models import Model_out
+from models import Model_out,Model_pred
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 import pymysql
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 import os
+import pickle
+
+
+
+def load_model():
+    vec = pickle.load(open("vectext.pickle", "rb"))
+    model = pickle.load(open("model1.pickle", 'rb'))
+    return model,vec
+model ,vec = load_model()
+
 
 load_dotenv()
 app = FastAPI()
+
 #conneries
 def connect():
     # Récupérer l'URL de la base de données à partir des variables d'environnement
@@ -39,7 +50,7 @@ def connect():
 async def get_hello():
     return {"hello":"world"}
 
-@app.get("/data")
+@app.get("/datasample")
 async def get_items():
     # Effectuer des opérations sur la base de données
     conn = connect()
@@ -52,7 +63,7 @@ async def get_items():
     conn.close()
     return {"items": results}
 
-@app.get("/5data")
+@app.get("/data")
 async def get_items(label :int =0 ,nbrow : int =5 ,lengthtext : int =200):
     # Effectuer des opérations sur la base de données
     conn = connect()
@@ -70,8 +81,6 @@ ORDER BY LENGTH(text) asc LIMIT {nbrow})")
     conn.close()
     return {"items": results}
 
-
-
 @app.post("/add")
 async def create_item(item: Model_out):
     # Perform operations on the database
@@ -84,6 +93,41 @@ async def create_item(item: Model_out):
         conn.commit()
     conn.close()
     return {"message": "Item created successfully"}
+
+# @app.post("/add")
+# async def create_item(item: Model_out):
+#     # Perform operations on the database
+#     conn = connect()
+#     with conn.cursor() as cursor:
+#         query = "INSERT INTO output_data (id,title,author,text,label) " \
+#                  "VALUES (%s, %s, %s, %s, %s)"
+#         values = (item.id, item.title, item.author, item.text, item.label)
+#         cursor.execute(query, values)
+#         conn.commit()
+#     conn.close()
+#     return {"message": "Item created successfully"}
+
+@app.post("/addpred")
+async def create_item(item: Model_pred):
+    # Perform operations on the database
+    conn = connect()
+    with conn.cursor() as cursor:
+        query = "INSERT INTO output_data (id,title,author,text,pred) " \
+                 "VALUES (%s, %s, %s, %s, %s)"
+        values = (item.id, item.title, item.author, item.text, item.pred)
+        cursor.execute(query, values)
+        conn.commit()
+    conn.close()
+    return {"message": "Item created successfully"}
+
+@app.get('/predict')
+def predict(stem_text: str = ""):
+    stem_obj = [stem_text]
+    stem_vec = vec.transform(stem_obj)
+    prediction  = model.predict(stem_vec)
+
+    return {str(prediction[0])}
+
 
 # # 4. Run the API with uvicorn
 # #    Will run on http://127.0.0.1:8000

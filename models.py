@@ -14,3 +14,10 @@ class Model_out(BaseModel):
     author : Optional[str]
     text : Optional[str]
     label : Optional[int]
+
+class Model_pred(BaseModel):
+    id: Optional[int]
+    title : Optional[str]
+    author : Optional[str]
+    text : Optional[str]
+    pred : Optional[int]
