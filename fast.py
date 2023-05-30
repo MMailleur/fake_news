@@ -99,6 +99,18 @@ ORDER BY LENGTH(text) asc LIMIT {nbrow})")
     conn.close()
     return {"items": results}
 
+
+@app.get("/dataoutput")
+async def get_items():
+    # Effectuer des opérations sur la base de données
+    conn = connect()
+    with conn.cursor() as cursor:
+        cursor.execute(f" (SELECT * FROM fakebase.output_data LIMIT )")
+        results = cursor.fetchall()
+    # Retourner les résultats de l'API
+    conn.close()
+    return {"items": results}
+
 @app.post("/add")
 async def create_item(item: Model_out):
     # Perform operations on the database
