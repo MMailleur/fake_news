@@ -15,8 +15,10 @@ import pickle
 def load_model():
     vec = pickle.load(open("vectext.pickle", "rb"))
     model = pickle.load(open("model1.pickle", 'rb'))
-    return model,vec
-model ,vec = load_model()
+    pipeline = pickle.load(open('pipeline.pkl', 'rb'))
+    return model,vec,pipeline
+
+model ,vec ,pipeline= load_model()
 
 
 load_dotenv()
@@ -135,6 +137,12 @@ def predict(stem_text: str = ""):
     prediction  = model.predict(stem_vec)
 
     return {str(prediction[0])}
+
+@app.get('/pred')
+def predict(text: str = ""):
+    text2 = [text]
+    y_pred = pipeline.predict(text2)
+    return {str(y_pred[0])}
 
 
 # # 4. Run the API with uvicorn
