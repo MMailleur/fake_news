@@ -85,7 +85,7 @@ async def get_items(label :int =0 ,nbrow : int =10 ,lengthtext : int =200):
     conn = connect()
     with conn.cursor() as cursor:
         cursor.execute(f" (SELECT * FROM fakebase.stem_data \
-where LENGTH(text) > {lengthtext} and LENGTH(title) >10 and LENGTH(author) >10   \
+where LENGTH(text) >50 and LENGTH(text) < {lengthtext} and LENGTH(title) >10 and LENGTH(author) >10   \
     LIMIT {nbrow})")
         results = cursor.fetchall()
     # Retourner les résultats de l'API
